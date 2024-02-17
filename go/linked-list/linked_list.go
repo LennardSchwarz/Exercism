@@ -29,47 +29,29 @@ func (n *Node) Prev() *Node {
 	return n.prev
 }
 
+// Insert value at the front of the list.
 func (l *List) Unshift(v interface{}) {
-	// check if the list is empty
-	if l.head == nil {
-		// create a new node
-		newNode := &Node{Value: v, next: nil, prev: nil}
-		// set the head and tail to the new node
-		l.head = newNode
-		l.tail = newNode
-		return
-	}
-	// create a new node
 	newNode := &Node{Value: v, next: l.head, prev: nil}
+	if l.head != nil {
+		l.head.prev = newNode
+	} else {
+		l.tail = newNode // Set tail if list was empty
+	}
 	l.head = newNode
-	l.head.next.prev = newNode
 }
 
+// Insert value at the back of the list.
 func (l *List) Push(v interface{}) {
-	// check if the list is empty
-	if l.head == nil {
-		// create a new node
-		newNode := &Node{Value: v, next: nil, prev: nil}
-		// set the head and tail to the new node
-		l.head = newNode
-		l.tail = newNode
-		return
+	newNode := &Node{Value: v, next: nil, prev: l.tail}
+	if l.tail != nil {
+		l.tail.next = newNode
+	} else {
+		l.head = newNode // Set head if list was empty
 	}
-	// range over the list to find the last node
-	for n := l.head; n != nil; n = n.next {
-		// if the next of the current node is nil, then the current node is the last node
-		if n.next == nil {
-			// create a new node
-			newNode := &Node{Value: v, next: nil, prev: n}
-			// set the next of the current node to the new node
-			n.next = newNode
-			// set the tail to the new node
-			l.tail = newNode
-			return
-		}
-	}
+	l.tail = newNode
 }
 
+// Remove value from the front of the list.
 func (l *List) Shift() (interface{}, error) {
 	// check if the list is empty
 	if l.head == nil {
@@ -89,20 +71,27 @@ func (l *List) Shift() (interface{}, error) {
 	return toShift.Value, nil
 }
 
+// Remove value from the back of the list.
 func (l *List) Pop() (interface{}, error) {
 	// check if the list is empty
 	if l.tail == nil {
 		return nil, nil
 	}
-	// get prev of tail
-	prev := l.tail.prev
+	toPop := l.tail
+	if l.head == l.tail {
+		// List has only one node
+		l.head = nil
+		l.tail = nil
+	} else {
+		// List has more than one node
+		l.tail = l.tail.prev
+		l.tail.next = nil
+	}
+	return toPop.Value, nil
 
-	// remove the next of prev
-	prev.next = nil
-
-	return l.tail.Value, nil
 }
 
+// Reverse the list.
 func (l *List) Reverse() {
 	current := l.head
 	var temp *Node
@@ -116,7 +105,7 @@ func (l *List) Reverse() {
 	}
 
 	// Swap the head and tail pointers.
-	if temp != nil {
+	if l.head != nil {
 		l.head, l.tail = l.tail, l.head
 	}
 }
